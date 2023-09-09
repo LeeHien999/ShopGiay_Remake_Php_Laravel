@@ -10,9 +10,11 @@ use App\Http\Controllers\API\APIProductController;
 use App\Http\Controllers\API\APIProductVariantController;
 use App\Http\Controllers\API\APIQuyenController;
 use App\Http\Controllers\API\APIThuongHieuController;
+use App\Http\Controllers\APIGioHangController;
 use App\Http\Controllers\APIHomePageController;
 use App\Http\Controllers\APITrangChuController;
 use App\Http\Controllers\GiayController;
+use App\Http\Controllers\GioHangController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -142,8 +144,16 @@ Route::group(['prefix' => '/home'], function(){
 
 
 Route::group(['prefix' => '/client'], function(){
-    Route::group(['prefix' => 'cart'], function(){
-        Route::post('/add-to-cart', [::class, 'add'])->name('clientLogin');
+    Route::group(['prefix' => '/cart'], function(){
+        Route::post('/data', [APIGioHangController::class, 'data'])->name('CartData');
+        Route::post('/add-to-cart', [APIGioHangController::class, 'add'])->name('AddToCart');
+        Route::post('/count-cart', [APIGioHangController::class, 'count'])->name('CountCart');
     });
+
+    Route::group(['prefix' => '/reset-password'], function(){
+        Route::post('/check-mail', [APIDanhSachTaiKhoanController::class, 'checkmail'])->name('CheckMail');
+        Route::post('/change-password', [APIDanhSachTaiKhoanController::class, 'changePassword'])->name('ChangePassword');
+    });
+
 });
 

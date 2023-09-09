@@ -104,7 +104,7 @@
                                     Remember me
                                 </label>
                             </div>
-                            <a href="#!" class="text-body">Forgot password?</a>
+                            <a href="/home/forgot-password/" class="text-body">Forgot password?</a>
                         </div>
 
                         <div class="text-center text-lg-start mt-4 pt-2">
@@ -164,10 +164,10 @@
                                 toastr.success(res.data.message, 'Success');
                                 setTimeout(() => {
                                     window.location.href = "/";
-                                }, 700);
+                                }, 2500);
                             } else {
                                 toastr.error(res.data.message, 'Error');
-                               
+
                             }
                         })
                         .catch((res) => {

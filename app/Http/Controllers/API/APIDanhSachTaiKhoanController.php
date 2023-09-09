@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendMail;
 use App\Models\DanhSachTaiKhoan;
 use App\Models\QuyenChucNang;
 use Exception;
@@ -10,7 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+use PhpParser\Node\Stmt\TryCatch;
 
 class APIDanhSachTaiKhoanController extends Controller
 {
@@ -44,11 +48,10 @@ class APIDanhSachTaiKhoanController extends Controller
                 'status'    => true,
                 'message'   => 'Đã thêm mới phim thành công!'
             ]);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
-
     }
 
     public function update(Request $request)
@@ -57,7 +60,7 @@ class APIDanhSachTaiKhoanController extends Controller
         try {
 
             $danhSachTaiKhoan   = DanhSachTaiKhoan::find($request->id);
-            if($danhSachTaiKhoan) {
+            if ($danhSachTaiKhoan) {
                 $data   = $request->all();
                 $danhSachTaiKhoan->update($data);
                 DB::commit();
@@ -72,11 +75,10 @@ class APIDanhSachTaiKhoanController extends Controller
                     'message'   => 'Phim không tồn tại!'
                 ]);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
-
     }
 
     public function data()
@@ -95,8 +97,8 @@ class APIDanhSachTaiKhoanController extends Controller
 
             $danhSachTaiKhoan   = DanhSachTaiKhoan::find($request->id);
             // dd($danhSachTaiKhoan);
-            if($danhSachTaiKhoan) {
-                if($danhSachTaiKhoan->tinh_trang == 1) {
+            if ($danhSachTaiKhoan) {
+                if ($danhSachTaiKhoan->tinh_trang == 1) {
                     $danhSachTaiKhoan->tinh_trang = 0;
                 } else {
                     $danhSachTaiKhoan->tinh_trang = 1;
@@ -114,7 +116,7 @@ class APIDanhSachTaiKhoanController extends Controller
                     'message'   => 'Tài khoản không tồn tại!'
                 ]);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
@@ -127,8 +129,8 @@ class APIDanhSachTaiKhoanController extends Controller
 
             $danhSachTaiKhoan   = DanhSachTaiKhoan::find($request->id);
             // dd($danhSachTaiKhoan);
-            if($danhSachTaiKhoan) {
-                if($danhSachTaiKhoan->is_block == 1) {
+            if ($danhSachTaiKhoan) {
+                if ($danhSachTaiKhoan->is_block == 1) {
                     $danhSachTaiKhoan->is_block = 0;
                 } else {
                     $danhSachTaiKhoan->is_block = 1;
@@ -146,7 +148,7 @@ class APIDanhSachTaiKhoanController extends Controller
                     'message'   => 'Tài khoản không tồn tại!'
                 ]);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
@@ -174,7 +176,7 @@ class APIDanhSachTaiKhoanController extends Controller
         try {
 
             $danhSachTaiKhoan   = DanhSachTaiKhoan::find($request->id);
-            if($danhSachTaiKhoan) {
+            if ($danhSachTaiKhoan) {
                 DB::commit();
                 return response()->json([
                     'status'    => 1,
@@ -186,11 +188,10 @@ class APIDanhSachTaiKhoanController extends Controller
                     'message'   => 'Tài khoản không tồn tại!'
                 ]);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
-
     }
 
     public function destroy(Request $request)
@@ -200,7 +201,7 @@ class APIDanhSachTaiKhoanController extends Controller
 
             $danhSachTaiKhoan   = DanhSachTaiKhoan::find($request->id);
 
-            if($danhSachTaiKhoan) {
+            if ($danhSachTaiKhoan) {
                 $danhSachTaiKhoan->delete();
                 DB::commit();
                 return response()->json([
@@ -213,26 +214,37 @@ class APIDanhSachTaiKhoanController extends Controller
                     'message'   => 'Tài khoản không tồn tại!'
                 ]);
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
             DB::rollBack();
         }
-
     }
 
     public function ClientRegister(Request $request)
     {
-        $data               = $request->all();
-        $data['is_block']   =   0;
-        $data['tinh_trang'] =   0;
-        $data['password']   = bcrypt($request->password);  // Gốc 123456 -> Lưu: e10adc3949ba59abbe56e057f20f883e
+        $check = DanhSachTaiKhoan::where('email', $request->email)->first();
+        if (!$check) {
+            $data               = $request->all();
+            $data['is_block']   =   0;
+            $data['tinh_trang'] =   0;
+            $data['active_code'] = Str::uuid();
 
-        DanhSachTaiKhoan::create($data);
+            $data['password']   = bcrypt($request->password);  // Gốc 123456 -> Lưu: e10adc3949ba59abbe56e057f20f883e
+            DanhSachTaiKhoan::create($data);
 
-        return response()->json([
-            'status'    => 1,
-            'message'   => 'Đã thêm mới tài khoản thành công!',
-        ]);
+            $data2['ho_va_ten'] = $data['ho_va_ten'];
+            $data2['link']      = env('APP_URL') . '/active-account/' . $data['active_code'];
+            Mail::to($data['email'])->send(new SendMail('Kích hoạt tài khoản', 'client.pages.active_account.active_account_templace', $data2));
+            return response()->json([
+                'status'    => 1,
+                'message'   => 'Đã thêm mới tài khoản thành công, vui lòng kiểm tra email để kích hoạt tài khoản !',
+            ]);
+        } else {
+            return response()->json([
+                'status'    => 0,
+                'message'   => 'email này đã được đăng ký tài khoản, vui lòng chọn email khác !',
+            ]);
+        }
     }
 
     public function ClientLogin(Request $request)
@@ -251,12 +263,26 @@ class APIDanhSachTaiKhoanController extends Controller
         //     ]);
         // }
         $check      =   DanhSachTaiKhoan::where('email', $request->email)
-                                        // ->where('password', $request->password)
-                                        ->first();
+            // ->where('password', $request->password)
+            ->first();
         $mk_luu     =   $check->password;
         $mk_nhap    =   $request->password;
 
-        if($check && password_verify($mk_nhap, $mk_luu))  {
+        if ($check && password_verify($mk_nhap, $mk_luu)) {
+            if($check->tinh_trang == 0)
+            {
+                return response()->json([
+                    'status'    => 0,
+                    'message'   => 'Tài khoản chưa được kích hoạt!',
+                ]);
+            }
+            if($check->is_block == 1)
+            {
+                return response()->json([
+                    'status'    => 0,
+                    'message'   => 'Tài khoản chưa đã bị khóa!',
+                ]);
+            }
             // Ở đây nghĩa là ta check email và password nó giống ở database
             // Ta cần tạo 1 biến auth và giá trị và thông tin tài khoản của user vừa đăng nhập
             // Session::start();
@@ -279,5 +305,61 @@ class APIDanhSachTaiKhoanController extends Controller
         return response()->json([
             'status' => '1'
         ]);
+    }
+
+    public function checkmail(Request $request)
+    {
+        $taikhoan = DanhSachTaiKhoan::where('email', $request->email)->first();
+        if ($taikhoan) {
+            $taikhoan->change_password_code = Str::uuid();
+            $taikhoan->save();
+
+            $data['ho_va_ten'] = $taikhoan->ho_va_ten;
+            $data['link']      = env('APP_URL') . '/home/reset-password/' . $taikhoan->change_password_code;
+            Mail::to($taikhoan->email)->send(new SendMail('Khôi phục mật khẩu', 'client.pages.reset_password.active_reset_password', $data));
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'vui lòng kiểm tra mail của bạn'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy email vui lòng nhập lại !'
+            ]);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $taikhoan = DanhSachTaiKhoan::where('change_password_code', $request->id)->first();
+            if ($taikhoan) {
+                if ($request->password == $request->re_password) {
+                    $taikhoan->password = $request->password;
+                    $taikhoan->save();
+                    $taikhoan->change_password_code = null;
+                    DB::commit();
+                    return response()->json([
+                        'status' => 1,
+                        'message' => 'cập nhật mật khẩu thành công !'
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Mật khẩu không trùng nhau vui lòng nhập lại !'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'tài khoản không tồn tại'
+                ]);
+            }
+        } catch (Exception $e) {
+            Log::error($e);
+            DB::rollBack();
+        }
     }
 }

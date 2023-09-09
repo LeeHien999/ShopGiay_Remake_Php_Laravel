@@ -60,8 +60,7 @@
                                 <ul v-if="color != -1">
                                     <li v-for="(v, k) in List_Size">
                                         <button v-on:click="size = v.kich_thuoc_id, prod_choosed.id = v.id"
-                                            v-bind:class="['btn', { 'btn-dark': size === v.kich_thuoc_id }]"
-                                            >
+                                            v-bind:class="['btn', { 'btn-dark': size === v.kich_thuoc_id }]">
                                             @{{ v.ten_kich_thuoc }}
                                         </button>
                                     </li>
@@ -86,22 +85,29 @@
 
                         <div class="input-group mb-4">
                             <span class="input-group-btn">
-                                <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="" onclick="giam()">
+                                <button type="button" class="quantity-left-minus btn" data-type="minus" data-field=""
+                                    onclick="giam()">
                                     <i class="icon-minus2"></i>
                                 </button>
                             </span>
                             <input type="number" id="quantity" name="quantity" class="form-control input-number"
                                 value="1" min="1" max="100">
                             <span class="input-group-btn ml-1">
-                                <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="" onclick="tang()">
+                                <button type="button" class="quantity-right-plus btn" data-type="plus" data-field=""
+                                    onclick="tang()">
                                     <i class="icon-plus2"></i>
                                 </button>
                             </span>
                         </div>
                         <div class="row">
                             <div class="col-sm-12 text-center">
-                                <p class="addtocart"><a href="cart.html" class="btn btn-primary btn-addtocart"><i
-                                            class="icon-shopping-cart"></i> Add to Cart</a></p>
+                                @if (!Session::get('auth'))
+                                    <h5 class="text-danger">Vui lòng đăng nhập để mua hàng !!</h5>
+                                @else
+                                    <p class="addtocart"><a class="btn btn-primary btn-addtocart"
+                                            v-on:click="AddProduct()"><i class="icon-shopping-cart"></i> Add to Cart</a></p>
+                                @endif
+
                             </div>
                         </div>
                     </div>
@@ -294,13 +300,13 @@
                 List_Size: [],
                 color: -1,
                 size: -1,
-                prod_choosed : {
-                    'id' : -1,
-                    'so_luong' : 0,
+                prod_choosed: {
+                    'id': -1,
+                    'so_luong': 0,
                 },
             },
             created() {
-
+                toastr.error('fail');
             },
             methods: {
                 load_Size(prod_id, color_id) {
@@ -321,12 +327,25 @@
 
                 },
 
-                AddOnCart()
-                {
+                AddProduct() {
+                    this.prod_choosed.so_luong = $('#quantity').val();
                     axios
-                        .post('{{Route('')}}', payload)
+                        .post('{{ Route('AddToCart') }}', this.prod_choosed)
                         .then((res) => {
+                            if (res.data.status) {
+                                toastr.success(res.data.message);
+                            } else {
+                                toastr.error(res.data.message);
+                            }
+                        });
+                    this.CountProduct();
+                },
 
+                CountProduct() {
+                    axios
+                        .post('{{ Route('CountCart') }}')
+                        .then((res) => {
+                            $('#countofprod').text(res.data.data);
                         })
                         .catch((res) => {
                             $.each(res.response.data.errors, function(k, v) {
@@ -337,12 +356,12 @@
             },
         });
 
-        function tang(){
+        function tang() {
             var val = document.getElementById("quantity");
             val.value = parseInt(val.value) + 1;
         }
 
-        function giam(){
+        function giam() {
             var val = document.getElementById("quantity");
             val.value = parseInt(val.value) - 1;
         }

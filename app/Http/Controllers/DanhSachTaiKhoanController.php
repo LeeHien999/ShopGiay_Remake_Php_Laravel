@@ -16,6 +16,45 @@ class DanhSachTaiKhoanController extends Controller
         return view('admin.page.danh_sach_tai_khoan.index');
     }
 
+    public function active($id)
+    {
+        $check = DanhSachTaiKhoan::where('active_code', $id)->first();
+        if($check)
+        {
+            $check->tinh_trang = 1;     //1 là được kích hoạt, 0 là chưa kích hoạt
+            $check->active_code = null;
+            $check->save();
+            toastr()->success('kích hoạt tài khoản thành công !');
+            return redirect('/home/login');
+        }
+        else
+        {
+            toastr()->error('Liên kết không tồn tại');
+            return redirect('/');
+
+        }
+    }
+
+    public function forgotPassword()
+    {
+        return view('client.pages.reset_password.forgot_password');
+
+    }
+
+    public function resetPassword($id)
+    {
+        $taikhoan = DanhSachTaiKhoan::where('change_password_code', $id)->first();
+        if($taikhoan)
+        {
+            return view('client.pages.reset_password.change_password', compact('id'));
+        }else
+        {
+            toastr()->error('liên kết không tồn tại !');
+            return redirect('/');
+        }
+
+
+    }
     /**
      * Show the form for creating a new resource.
      */

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DanhSachTaiKhoan;
 use App\Models\Giay;
 use App\Models\MauSac;
 use App\Models\Product;
@@ -71,4 +72,6 @@ class TrangChuController extends Controller
         } else
             return redirect('/');
     }
+
+   
 }

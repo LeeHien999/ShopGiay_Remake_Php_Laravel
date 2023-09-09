@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DanhMucController;
 use App\Http\Controllers\DanhSachTaiKhoanController;
 use App\Http\Controllers\GiayController;
+use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\KichThuocController;
 use App\Http\Controllers\LoaiGiayController;
 use App\Http\Controllers\MauSacController;
@@ -28,7 +29,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('admin/login', [AdminController::class, 'login']);
 Route::get('/', [TrangChuController::class, 'index']);
-
+Route::get('/active-account/{id}', [DanhSachTaiKhoanController::class, 'active']);
 
 Route::group(['prefix' => '/home'], function(){
     Route::group(['prefix' => 'men-products'], function(){
@@ -37,8 +38,15 @@ Route::group(['prefix' => '/home'], function(){
     Route::group(['prefix' => 'women-products'], function(){
         Route::get('/', [TrangChuController::class, 'womenProducts']);
     });
-    Route::get('/product-detail/{id}', [TrangChuController::class, 'detailGiay']);
 
+    Route::group(['prefix' => 'cart'], function(){
+        Route::get('/', [GioHangController::class, 'index']);
+    });
+
+    Route::get('/forgot-password', [DanhSachTaiKhoanController::class, 'forgotPassword']);
+    Route::get('/reset-password/{id}', [DanhSachTaiKhoanController::class, 'resetPassword']);
+
+    Route::get('/product-detail/{id}', [TrangChuController::class, 'detailGiay']);
     Route::get('/login', [TrangChuController::class, 'login']);
     Route::get('/register', [TrangChuController::class, 'register']);
 });

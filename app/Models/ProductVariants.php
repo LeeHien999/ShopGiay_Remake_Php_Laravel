@@ -14,6 +14,6 @@ class ProductVariants extends Model
         'kich_thuoc_id',
         'mau_sac_id',
         'so_luong',
-        'hinh_anh'
+        'hinh_anh',
     ];
 }

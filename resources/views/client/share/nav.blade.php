@@ -35,14 +35,14 @@
                                 <li><a href="add-to-wishlist.html">Wishlist</a></li>
                                 @if (Session::get('auth') == null)
                                     <li><a href="/home/login/">Login</a></li>
-                                    <li><a href="/home/login/">Register</a></li>
+                                    <li><a href="/home/register/">Register</a></li>
                                 @else
                                     <li><a href="#" v-on:click="logout()">Logout</a></li>
                                 @endif
 
                             </ul>
                         </li>
-                        <li class="cart"><a href="cart.html"><i class="icon-shopping-cart"></i> Cart [0]</a></li>
+                        <li class="cart"><a href="/home/cart/"><i class="icon-shopping-cart"></i> Cart [<span id="countofprod"></span>]</a></li>
                     </ul>
                 </div>
             </div>
@@ -84,10 +84,10 @@
     new Vue({
         el: '#app',
         data: {
-
+            count : 0,
         },
-        created() {
-
+        created(){
+            this.CountProduct();
         },
         methods: {
             logout() {
@@ -102,6 +102,21 @@
                         }
                     });
             },
+
+            CountProduct()
+            {
+                axios
+                    .post('{{Route('CountCart')}}')
+                    .then((res) => {
+                        this.count = res.data.data;
+                        $('#countofprod').text(this.count);
+                    })
+                    .catch((res) => {
+                        $.each(res.response.data.errors, function(k, v) {
+                            toastr.error(v[0], 'Error');
+                        });
+                    });
+            }
         },
     });
 </script>
