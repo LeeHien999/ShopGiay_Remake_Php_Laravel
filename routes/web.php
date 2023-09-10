@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DanhMucController;
 use App\Http\Controllers\DanhSachTaiKhoanController;
+use App\Http\Controllers\DonHangController;
 use App\Http\Controllers\GiayController;
 use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\KichThuocController;
@@ -26,8 +27,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('admin/login', [AdminController::class, 'login']);
+Route::get('/test', [TestController::class, 'index']);
+Route::get('/admin/login', [AdminController::class, 'login']);
 Route::get('/', [TrangChuController::class, 'index']);
 Route::get('/active-account/{id}', [DanhSachTaiKhoanController::class, 'active']);
 
@@ -41,6 +42,8 @@ Route::group(['prefix' => '/home'], function(){
 
     Route::group(['prefix' => 'cart'], function(){
         Route::get('/', [GioHangController::class, 'index']);
+        Route::get('/check-out/{id}', [DonHangController::class, 'index']);
+        Route::get('/order-complete', [DonHangController::class, 'orderComplete']);
     });
 
     Route::get('/forgot-password', [DanhSachTaiKhoanController::class, 'forgotPassword']);

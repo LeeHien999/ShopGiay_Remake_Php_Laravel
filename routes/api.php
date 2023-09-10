@@ -10,6 +10,8 @@ use App\Http\Controllers\API\APIProductController;
 use App\Http\Controllers\API\APIProductVariantController;
 use App\Http\Controllers\API\APIQuyenController;
 use App\Http\Controllers\API\APIThuongHieuController;
+use App\Http\Controllers\APIChiTietDonHangController;
+use App\Http\Controllers\APIDonHangController;
 use App\Http\Controllers\APIGioHangController;
 use App\Http\Controllers\APIHomePageController;
 use App\Http\Controllers\APITrangChuController;
@@ -143,9 +145,10 @@ Route::group(['prefix' => '/home'], function(){
 });
 
 
-Route::group(['prefix' => '/client'], function(){
+Route::group(['prefix' => '/client', 'middleware' => 'APIClient'], function(){
     Route::group(['prefix' => '/cart'], function(){
         Route::post('/data', [APIGioHangController::class, 'data'])->name('CartData');
+        Route::post('/create-code', [APIGioHangController::class, 'createCode'])->name('CreateCheckOutCode');
         Route::post('/add-to-cart', [APIGioHangController::class, 'add'])->name('AddToCart');
         Route::post('/count-cart', [APIGioHangController::class, 'count'])->name('CountCart');
     });
@@ -155,5 +158,8 @@ Route::group(['prefix' => '/client'], function(){
         Route::post('/change-password', [APIDanhSachTaiKhoanController::class, 'changePassword'])->name('ChangePassword');
     });
 
+    Route::group(['prefix' => '/order'], function(){
+        Route::post('/order-complete', [APIDonHangController::class, 'orderComplete'])->name('OrderComplete');
+    });
 });
 

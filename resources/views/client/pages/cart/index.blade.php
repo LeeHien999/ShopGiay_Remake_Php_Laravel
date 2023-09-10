@@ -101,7 +101,7 @@
                                                 placeholder="Your Coupon Number...">
                                         </div>
                                         <div class="col-sm-3">
-                                            <input type="submit" value="Apply Coupon" class="btn btn-primary">
+                                            <button type="button" class="btn btn-primary text-white" v-on:click="checkOut()">Thanh toán</button>
                                         </div>
                                     </div>
                                 </form>
@@ -213,12 +213,28 @@
 
                 },
 
+                checkOut()
+                {
+                    axios
+                        .post('{{Route('CreateCheckOutCode')}}')
+                        .then((res) => {
+                            if(res.data.status == 1) {
+                                window.location.href="/home/cart/check-out/" + res.data.id + "";
+                            } else {
+                                toastr.error(res.data.message, 'Error');
+                            }
+
+                        });
+                },
+
                 sumOne(gia, so_luong) {
                     return gia * so_luong;
                 },
                 formatNumber(price) {
                     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 },
+
+
             },
         });
     </script>

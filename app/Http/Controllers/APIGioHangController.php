@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DanhSachTaiKhoan;
 use App\Models\GioHang;
 use Exception;
 use Illuminate\Http\Request;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use PhpParser\Node\Stmt\TryCatch;
+use Illuminate\Support\Str;
 
 class APIGioHangController extends Controller
 {
@@ -71,6 +73,18 @@ class APIGioHangController extends Controller
         return response()->json([
             'status' => 1,
             'data' => $count,
+        ]);
+    }
+
+    public function createCode(Request $request)
+    {
+        $taikhoan = DanhSachTaiKhoan::where('id', Session::get('auth')->id)->first();
+        $taikhoan->checkout_code = Str::uuid();
+        $taikhoan->save();
+
+        return response()->json([
+            'status' => 1,
+            'id'    => $taikhoan->checkout_code,
         ]);
     }
 }
